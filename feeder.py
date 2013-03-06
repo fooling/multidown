@@ -15,6 +15,8 @@ class Feeder(threading.Thread):
 
         self.__fp=open(filename,'r')
 
+        self.daemon=True
+
 
     def run(self):
         while True:
@@ -22,11 +24,12 @@ class Feeder(threading.Thread):
                 line=self.__fp.readline()
                 if line!='':
                     self.__buff.append(line)
+                    print "feed got",line
 
             time.sleep(5)
 
     def get_one(self):
-        if self.__buff=[]:
+        if self.__buff==[]:
             return None
         
         line=self.__buff.pop(0)
