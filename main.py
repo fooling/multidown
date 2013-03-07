@@ -10,7 +10,7 @@ import feeder
 script,param=argv
 
 
-thread_num=2
+thread_num=10
 
 if os.path.exists(param) is False:
     raise SystemError("File not exist")
@@ -23,7 +23,7 @@ feed=feeder.Feeder(param)
 feed.start()
 
 
-threads.ThreadList(thread_num,threads.UrlDirName,feed)
+tlist=threads.ThreadList(thread_num,threads.UrlDirName,feed)
 
 
 
