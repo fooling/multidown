@@ -10,7 +10,7 @@ import feeder
 script,param=argv
 
 
-thread_num=10
+thread_num=3
 
 if os.path.exists(param) is False:
     raise SystemError("File not exist")

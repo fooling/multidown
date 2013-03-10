@@ -16,6 +16,12 @@ class ThreadList(object):
         self.__max=num
         self.__type=threadtype
         self.__feed=feed
+        #lock of the threadlist
+        self.__list_lock=threading.Lock()
+
+        #lock of the feeder
+        self.__feed_condition=feed.get_condition()
+
         for i in range(num):
             
             tmpthread=self.__type()
@@ -23,9 +29,14 @@ class ThreadList(object):
 
         pass
     def _get_feed(self):
+        #TODO add lock
         one=self.__feed.get_one()
+        self.__feed_condition.acquire()
         while one==None:
+            self.__feed_condition.wait()
+            print "waiting"
             one=self.__feed.get_one()
+        self.__feed_condition.release()
         return one
             
 
@@ -35,10 +46,18 @@ class ThreadList(object):
         
 
     def _add(self,thread):
+        
+        #acquire
+        self.__list_lock.acquire()
+
         self.__index+=1
         thread._reg(self,self.__index)
         thread.start()
         self.__tlist.update({self.__index:thread})
+
+        #release
+        self.__list_lock.release()
+
         one =self._get_feed()
         thread._feed(one)
 
@@ -47,8 +66,13 @@ class ThreadList(object):
 
     def _del(self,thread):
         thread.stop()
+
+        self.__list_lock.acquire()
+
         tid=thread._get_id()
         del self.__tlist[tid]
+
+        self.__list_lock.release()
 
     def _worker_dead(self,worker):
         self._del(worker)
@@ -58,7 +82,7 @@ class ThreadList(object):
     def _worker_fail(self,worker,data):
         self._worker_dead(worker)
         self.__fail_data.append(data)
-        print "fail list : ",self.__fail_data
+        print "fail link : ",data
             
     def _job_finished(self,worker):
         one=self._get_feed()
