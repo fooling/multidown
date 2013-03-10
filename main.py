@@ -21,6 +21,7 @@ if os.path.exists('tmp') is False:
 
 feed=feeder.Feeder(param)
 feed.start()
+time.sleep(1)
 
 
 tlist=threads.ThreadList(thread_num,threads.UrlDirName,feed)
