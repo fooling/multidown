@@ -22,7 +22,7 @@ class ThreadList(object):
         #lock of the feeder
         self.__feed_condition=feed.get_condition()
 
-        for i in range(num):
+        for i in xrange(num):
             
             tmpthread=self.__type()
             self._add(tmpthread)
@@ -177,7 +177,7 @@ class UrlDirName(threading.Thread):
 
     def __download(self,url):
 
-        for i in range(self.__try_max):
+        for i in xrange(self.__try_max):
             try:
                 return urllib2.urlopen(url).read()
             except:
