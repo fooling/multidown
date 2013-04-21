@@ -29,4 +29,5 @@ tlist=threads.ThreadList(thread_num,threads.UrlDirName,feed)
 
 
 while True:
-    time.sleep(5)
+    time.sleep(30)
+    print "now alive: ",tlist._get_length()

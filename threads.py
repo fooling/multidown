@@ -51,6 +51,7 @@ class ThreadList(object):
         self.__list_lock.acquire()
 
         self.__index+=1
+        #print "index is %d" %self.__index
         thread._reg(self,self.__index)
         thread.start()
         self.__tlist.update({self.__index:thread})
@@ -66,11 +67,10 @@ class ThreadList(object):
 
     def _del(self,thread):
         #thread.join()
-        thread.stop()
+        tid=thread._get_id()
 
         self.__list_lock.acquire()
 
-        tid=thread._get_id()
         del self.__tlist[tid]
 
         self.__list_lock.release()
@@ -79,12 +79,12 @@ class ThreadList(object):
         self._del(worker)
 
 
-        self.__list_lock.acquire()
+        #self.__list_lock.acquire()
 
-        if len(self.__tlist)<self.__max:
-            self._add(self.__type())
+        #if len(self.__tlist)<self.__max:
+        self._add(self.__type())
 
-        self.__list_lock.release()
+        #self.__list_lock.release()
             
     def _worker_fail(self,worker,data):
         self._worker_dead(worker)
@@ -94,6 +94,9 @@ class ThreadList(object):
     def _job_finished(self,worker):
         one=self._get_feed()
         worker._feed(one)
+    def _get_length(self):
+        #TODO  lock
+        return len(self.__tlist)
         
 
 
@@ -116,10 +119,10 @@ class UrlDirName(threading.Thread):
         while True:
             
             if self.is_stop(): 
-                print "thread %d is stoped",self.__id
-                if self.__tlist!='':
-                    self.__tlist._worker_dead(self)
-                self.join()
+                print "thread %d is stoped" %self.__id
+                #if self.__tlist!='':
+                #    self.__tlist._worker_dead(self)
+                #self.join()
 
                 return
 
@@ -139,6 +142,7 @@ class UrlDirName(threading.Thread):
             except:
                 print "broken url"
                 self.__tlist._worker_fail(self,"broken url")
+                self.stop()
                 continue
                 
                 
@@ -148,6 +152,7 @@ class UrlDirName(threading.Thread):
                 print "duplicate file",path
                 #path+="1"
                 self.__tlist._worker_fail(self,url)
+                self.stop()
                 continue
 
             print "starting to download ",url
@@ -155,6 +160,7 @@ class UrlDirName(threading.Thread):
             tmpfile=self.__download(url)
             if tmpfile==None:
                 self.__tlist._worker_fail(self,url)
+                self.stop()
                 continue 
             
             print url,"downloaded"
@@ -169,6 +175,7 @@ class UrlDirName(threading.Thread):
                 tmpfp.close()
             except:
                 self.__tlist._worker_fail(self,url)
+                self.stop()
                 continue
 
             
