@@ -77,8 +77,10 @@ class ThreadList(object):
 
     def _worker_dead(self,worker):
         self._del(worker)
+        self.__list_lock.acquire()
         if len(self.__tlist)<self.__max:
             self._add(self.__type())
+        self.__list_lock.release()
             
     def _worker_fail(self,worker,data):
         self._worker_dead(worker)
@@ -121,18 +123,27 @@ class UrlDirName(threading.Thread):
                 print "thread %d is waiting to be feed..." % self.__id
                 time.sleep(2)
 
+            try:
 
-            line =self.__feed
-            self.__feed=''
-            url,directory,name=line.split(',')
+                line =self.__feed
+                self.__feed=''
+                url,directory,name=line.split(',')
+                    
 
-            directory='tmp/'+directory
-            path=directory+'/'+name+url.split('/')[-1]
-            
-            if os.path.exists(path):
-                print "duplicate file",path
-                self.__tlist._worker_fail(self,url)
+                directory='tmp/'+directory
+                path=directory+'/'+name+url.split('/')[-1]
+            except:
+                self.__tlist._worker_fail(self,"broken url")
                 return
+                
+                
+
+            
+            while os.path.exists(path): 
+                print "duplicate file",path
+                path+="1"
+                #self.__tlist._worker_fail(self,url)
+                #return
 
             print "starting to download ",url
             
@@ -153,6 +164,8 @@ class UrlDirName(threading.Thread):
                 tmpfp.close()
             except:
                 self.__tlist._worker_fail(self,url)
+                return
+
             
             self.__tlist._job_finished(self)
             
