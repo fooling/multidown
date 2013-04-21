@@ -139,11 +139,9 @@ class UrlDirName(threading.Thread):
                 
 
             
-            while os.path.exists(path): 
-                print "duplicate file",path
-                path+="1"
-                #self.__tlist._worker_fail(self,url)
-                #return
+            if os.path.exists(path): 
+                self.__tlist._worker_fail(self,url)
+                return
 
             print "starting to download ",url
             
