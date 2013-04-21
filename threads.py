@@ -65,6 +65,7 @@ class ThreadList(object):
 
 
     def _del(self,thread):
+        #thread.join()
         thread.stop()
 
         self.__list_lock.acquire()
@@ -112,6 +113,7 @@ class UrlDirName(threading.Thread):
                 print "thread %d is stoped",self.__id
                 if self.__tlist!='':
                     self.__tlist._worker_dead(self)
+                self.join()
 
                 return
 
